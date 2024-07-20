@@ -15,16 +15,21 @@ pub async fn loop_blocks() -> Result<()> {
             Ok(block) => {
                 let block = U64::from(block);
                 if block > last_block {
-                    println!("{} {}", "New block".green(), block.to_string().blue());
+                    println!("\n\n{} {}", "New block".green(), block.to_string().blue());
                     last_block = block;
                     // Get the block details
                     let block_details = provider.get_block_by_number(block.try_into().unwrap(), true).await;
 
                     // extract the transactions 
                     let txs = block_details.unwrap().unwrap().transactions;
+                    println!("{:?} new transactions found \n", txs.hashes().count());
+
+                    // sleep a bit
+                    sleep(Duration::from_secs(1)).await;
                     txs.hashes().for_each(|tx| {
-                        println!("{:?}", tx);
+                        println!("{:?}", tx); // conditionnal coloring on sell or buy 
                     });
+
 
                 }
             }
