@@ -23,12 +23,43 @@ pub async fn loop_blocks() -> Result<()> {
                     // extract the transactions 
                     let txs = block_details.unwrap().unwrap().transactions;
                     println!("{:?} new transactions found \n", txs.hashes().count());
+                    sleep(Duration::from_secs(1)).await;
 
                     // sleep a bit
-                    sleep(Duration::from_secs(1)).await;
+                    /*
                     txs.hashes().for_each(|tx| {
                         println!("{:?}", tx); // conditionnal coloring on sell or buy 
                     });
+                    */
+
+                    // retrieve transactions details
+                    let vec = txs.hashes().collect::<Vec<_>>();
+                    let mut i = 0;
+                    for tx in vec {
+                        let tx_details = provider.get_transaction_by_hash(*tx).await;
+                        println!("{:?}", tx_details);
+                        i += 1;
+                        match i {
+                            1 => println!("{}", "--------------------------------------------------------------------------------".on_green()),
+                            2 => println!("{}", "--------------------------------------------------------------------------------".on_blue()),
+                            3 => println!("{}", "--------------------------------------------------------------------------------".on_magenta()),
+                            4 => println!("{}", "--------------------------------------------------------------------------------".on_cyan()),
+                            5 => println!("{}", "--------------------------------------------------------------------------------".on_yellow()),
+                            6 => println!("{}", "--------------------------------------------------------------------------------".on_red()),
+                            7 => println!("{}", "--------------------------------------------------------------------------------".on_black()),
+                            8 => println!("{}", "--------------------------------------------------------------------------------".on_white()),
+                            9 => println!("{}", "--------------------------------------------------------------------------------".on_green()),
+                            10 => println!("{}", "--------------------------------------------------------------------------------".on_blue()),
+                            _ => {}
+                        }
+                        println!("\n\n");
+                        if i == 10 {
+                            break;
+                        }
+                    }
+
+                    println!("just reviewed block {} \n and {} transactions", block.to_string().blue(), txs.hashes().count().to_string().on_magenta());
+
 
 
                 }
