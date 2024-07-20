@@ -9,7 +9,7 @@ pub async fn loop_blocks() -> Result<()> {
     let provider = ProviderBuilder::new().on_http(rpc_url);
     let mut last_block = U64::ZERO;
 
-    loop {
+    'main:loop {
         match provider.get_block_number().await {
             Ok(block) => {
                 let block = U64::from(block);
@@ -23,26 +23,38 @@ pub async fn loop_blocks() -> Result<()> {
 
                     let vec = txs.hashes().collect::<Vec<_>>();
                     for (i, tx) in vec.iter().enumerate() {
-                        if i >= 10 { break; }
+                        if i >= 100 { break; } // TODO: remove this for full scan
                         
                         if let Ok(Some(tx_details)) = provider.get_transaction_by_hash(**tx).await {
-                            let transaction_type = if tx_details.to.is_some() {
-                                if tx_details.input.len() > 2 {
-                                    "Contract Interaction".yellow()
-                                } else {
-                                    "Simple Transfer".green()
-                                }
-                            } else {
-                                "Contract Creation".red()
-                            };
+                                
+                            let transaction_type = tx_details.transaction_type.unwrap();
+
 
                             println!("Transaction: {}", tx.to_string().blue());
+                            // cf https://docs.rs/alloy/latest/alloy/rpc/types/struct.Transaction.html
+                            match transaction_type {
+                                // EIP-4844 
+                                3 => {
+                                    println!("Type: {}", "proto-danksharding".green());
+                                },
+                                // EIP-1559
+                                2 => {
+                                    println!("Type: {}", "EIP-1559".red().bold());
+                                },
+                                // EIP-2930
+                                1 => {
+                                    println!("Type: {}", "Acces List ".magenta());
+                                },
+                                _  => {
+                                    println!("Type: {}", "Legacy Transfer".green());
+                                }
+                            }
+
                             println!("Type: {}", transaction_type);
                             println!("From: {}", tx_details.from.to_string().cyan());
                             println!("To: {}", tx_details.to.map_or("Contract Creation".to_string(), |to| to.to_string()).cyan());
                             println!("Value: {} ETH", (f64::from(tx_details.value)  / 1e18).to_string().magenta());
                             
-  
                             println!("{}", "--------------------------------------------------------------------------------".on_blue());
                             println!("\n");
                         }
@@ -54,6 +66,6 @@ pub async fn loop_blocks() -> Result<()> {
                 eprintln!("{}{}", "Error fetching block number: ".red(), e.to_string().blue());
             }
         }
-        sleep(Duration::from_secs(1)).await;
+        //sleep(Duration::from_secs(1)).await;
     }
 }    
