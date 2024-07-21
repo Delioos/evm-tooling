@@ -1,4 +1,4 @@
-use alloy::{providers::Provider, providers::ProviderBuilder, primitives::U64};
+use alloy::{network::TransactionResponse, primitives::U64, providers::{Provider, ProviderBuilder}};
 use tokio::time::sleep;
 use colored::*;
 use eyre::Result;
@@ -49,6 +49,19 @@ pub async fn loop_blocks() -> Result<()> {
                                     println!("Type: {}", "Legacy Transfer".green());
                                 }
                             }
+
+                            let action = tx_details.input().to_string(); // bytecode associated with the transaction
+                            println!("Bytecode: {}", action.magenta());
+                            // contract interaction begin with method id : 0xa9059cbb
+                            /*
+
+                            let method_id = action.get(0..10).unwrap();
+                            
+                            if  method_id == "a9059cbb" {
+                                println!("{}", "Contract Interaction".on_bright_yellow());
+                                break 'main Ok(());
+                            }
+                            */
 
                             println!("Type: {}", transaction_type);
                             println!("From: {}", tx_details.from.to_string().cyan());
