@@ -1,0 +1,11 @@
+[package]
+name = "v3-subscriber"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy = { version = "0.2.0", features = ["full","node-bindings"] }
+colored =  "2.1.0"
+eyre = "0.6.12"
+futures-util = "0.3.30"
+tokio = { version = "1.39.1", features = ["full"] }
